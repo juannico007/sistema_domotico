@@ -80,7 +80,7 @@ void setup() {
   // Inicializa la camara con los pines asignados y si falla termina el programa
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
-    Serial.printf("Camera init failed with error 0x%x", err);
+    Serial.printf("Inicializacion fallida con error 0x%x", err);
     return;
   }
 
@@ -102,11 +102,11 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("");
-  Serial.println("WiFi connected");
+  Serial.println("WiFi conectado");
 
   //Inicializa la camara y conecta con Blynk
   startCameraServer();
-  Serial.print("Camera Ready! Use 'http://");
+  Serial.print("Camara lista!");
   Serial.print(WiFi.localIP());
   local_IP = WiFi.localIP().toString();
   Serial.println("' to connect");
@@ -117,9 +117,9 @@ void loop() {
   // put your main code here, to run repeatedly:
   Blynk.run();
   if(digitalRead(PIR) == LOW){
-  Serial.println("Send Notification");
-  Blynk.notify("Alert:Some one has been here.");
-  Serial.println("Capture Photo");
+  Serial.println("Enviar notificacion");
+  Blynk.notify("Alerta: Hay alguien en casa");
+  Serial.println("Toma foto");
   takePhoto();
   delay(3000);
   }
