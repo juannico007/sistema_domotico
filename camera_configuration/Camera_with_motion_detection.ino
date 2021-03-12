@@ -5,7 +5,7 @@
 
 const char* ssid = "XXXXXXXXXXXXXXX";               //Nombre de la red
 const char* password = "XXXXXXXXXXXXXX";            //Contraseña
-char auth[] = "wQ_9giXWggV_7YjOUlMS3mCA-Qgox_eI";   //Clave de autenticacion enviada por blynk
+char auth[] = "XXXXXXXXXXXXXXXX";                   //Clave de autenticacion dada por blynk
 
 // Seleccion del modelo de camara depende de la placa esp32-cam
 
