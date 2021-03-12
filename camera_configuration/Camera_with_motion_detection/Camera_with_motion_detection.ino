@@ -37,6 +37,14 @@ void takePhoto()
   delay(1000);
 }
 
+void take_photo_and_notify(){
+  Serial.println("Enviar notificacion");
+  Blynk.notify("Alerta: Hay alguien en casa");
+  Serial.println("Toma foto");
+  takePhoto();
+  delay(3000);
+}
+
 void setup() {
   Serial.begin(115200);
   pinMode(LED,OUTPUT);
@@ -106,22 +114,17 @@ void setup() {
 
   //Inicializa la camara y conecta con Blynk
   startCameraServer();
-  Serial.print("Camara lista!");
+  Serial.print("Camara lista! Use 'http://");
   Serial.print(WiFi.localIP());
   local_IP = WiFi.localIP().toString();
-  Serial.println("' to connect");
+  Serial.println("' para conectarse");
   Blynk.begin(auth, ssid, password);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   Blynk.run();
   if(digitalRead(PIR) == LOW){
-  Serial.println("Enviar notificacion");
-  Blynk.notify("Alerta: Hay alguien en casa");
-  Serial.println("Toma foto");
-  takePhoto();
-  delay(3000);
+    take_photo_and_notify();
   }
   if(digitalRead(PHOTO) == HIGH){
   Serial.println("Toma foto");
