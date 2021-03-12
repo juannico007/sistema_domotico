@@ -124,7 +124,7 @@ void loop() {
   delay(3000);
   }
   if(digitalRead(PHOTO) == HIGH){
-  Serial.println("Capture Photo");
+  Serial.println("Toma foto");
   takePhoto();
   }  
 }
