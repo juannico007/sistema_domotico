@@ -74,6 +74,24 @@ void turn_off(int BUZZER, int *bomb, int n){
   noTone(BUZZER, 500);
 }
 
+void alarm(int trig, int echo, int alarm){
+  //Enciende la alarma si el sensor de ultrasonido detecta un objeto en su rango
+  //Recibe dos pines que estan conectados al sensor de ultrasonido y otro pin que le manda la señal a la alarma
+  digitalWrite(trig,HIGH) ;
+  delay(1);
+  digitalWrite(trig,LOW);
+  //Prendemos el pin trig para que envie la señal que llegara al receptor echo
+  tiempo=pulseIn(echo,HIGH);
+  distancia=tiempo/58.2;
+  //Usamos formulas para saber a que distancia se encuentra un objeto
+  delay(1);
+  if (distancia>=2 and distancia<335){
+  	digitalWrite(alarm,HIGH);
+  }
+  else{
+  	digitalWrite(alarm,LOW);
+  //Encendemos la alarma si hay algo entre los limites del sensor de ultrasonido que va entre 2 cm a 335 cm
+}
 
 //-------------------------------------------------------------------------------------------------------
 
