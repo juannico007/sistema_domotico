@@ -24,6 +24,7 @@
   void takePhoto();
   void alarm_and_notify(int BUZZER, int *bomb, int n);
   void turn_off(int BUZZER, int *bomb, int n);
+  void alarm(int trig, int echo);
 
   //Temperatura
   float take_temp(DHT dht);
