@@ -27,7 +27,7 @@ void graduate_light(int bomb, float val){
   Recibe el pin del bombillo a graduar y el valor
   El valor puede ser dado con un potenciometro o desde la aplicacion
   */
-  analogWrite(led, val);
+  analogWrite(bomb, val);
 }
 
 void auto_lights(int *bomb, int *PIR, int *fot, int n){
