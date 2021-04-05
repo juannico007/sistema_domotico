@@ -32,6 +32,11 @@
   void increase_temp(bool cond);
   void regulate_temp(DHT dht, int vent);
 
+  //Persianas
+  void open(int &position);
+  void close(int &position);
+  void blinds_time_action(int hours, int minutes, int &position);
+  
   //Modos
   void modo_fiesta(int R, int G, int B);
   void modo_seguro(int BUZZER, int *bomb, int *PIR, int n);
