@@ -146,6 +146,37 @@ float take_temp(DHT dht){
 
 //-------------------------------------------------------------------------------------------------------
 
+//---------------------------------FUNCIONES RELACIONADAS CON LAS PERSIANAS--------------------------------
+
+void open(int &position){
+  if (position > 0 ){
+  	for(unsigned int i = position; i >= 0; i-=10){
+      position -= 10;
+      blinds.write(position);
+    }
+  }
+  Serial.print(1000);
+}
+
+void close(int &position){
+  if (position < 180){
+  	for(unsigned int i = position; i <= 180; i+=10){
+      position += 10;
+      blinds.write(position);
+    }
+  }
+}
+
+void blinds_time_action(int hours, int minutes, int &position){
+  if (hours >= 6) {
+    open(position)
+  }else if (hours <= 18){
+    close(position)
+  }
+}
+
+//-------------------------------------------------------------------------------------------------------
+
 //---------------------------------FUNCIONES RELACIONADAS CON LOS MODOS--------------------------------
 void modo_fiesta(int R, int G, int B) {
   /* Ejecuta la iluminacion en casa con distintos colores para dar ambientacion de fiesta
