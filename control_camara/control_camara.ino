@@ -22,54 +22,24 @@ openmv::rpc_i2c_master interface(0x12, 100000);
 #define SSID1 "replace with your wifi ssid"
 #define PWD1 "replace your wifi password"
 
+WebServer server(80);
+
 //Variables para poder escribir la imagen en linea
 const char JHEADER[] = "HTTP/1.1 200 OK\r\n" \
                        "Content-disposition: inline; filename=capture.jpg\r\n" \
                        "Content-type: image/jpeg\r\n\r\n";
 const int jhdLen = strlen(JHEADER);
 
-WebServer server(80);
-
-void setup() {
-    // Inicio la interface y un canal de debug.
-    interface.begin();
-    Serial.begin(115200);
-
-    while (!Serial); // wait for Serial Monitor to connect. Needed for native USB port boards only:
-    IPAddress ip;
-
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(SSID1, PWD1);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-      delay(500);
-      Serial.print(F("."));
-    }
-    ip = WiFi.localIP();
-    Serial.println(F("WiFi connected"));
-    Serial.println("");
-    Serial.println(ip);
-    Serial.print("Stream Link: http://");
-    Serial.print(ip);
-    Serial.println("/mjpeg/1");
-    server.on("/mjpeg/1", HTTP_GET, handle_jpg_stream);
-    server.on("/jpg", HTTP_GET, handle_jpg);
-    server.onNotFound(handleNotFound);
-    server.begin();
-    Serial.println(F("Initialization done."));
-}
-
-void loop() {
-    // Establece el formato de los pixeles y el tamaño de la imagen para ser leidos por la camara
-    const char pixformat_and_framesize[] = "sensor.RGB565,sensor.QQQVGA";
+void handle_jpg(void)
+{
+  // Establece el formato de los pixeles y el tamaño de la imagen para ser leidos por la camara
+    char pixformat_and_framesize[] = "sensor.RGB565,sensor.QQQVGA";
     uint32_t jpeg_size;
 
     WiFiClient client = server.client();
-
-    if (!client.connected()) return;
-    cam.run();
+    
     client.write(JHEADER, jhdLen);
-
+    
     // La funcion jpeg_image_snapshot toma una imagen jpeg, la guarda en la memoria de la camara y retorna
     // el tamaño de la imagen jpg en bytes para ser leidos por el arduino.
     Serial.println(F("Taking a pic..."));
@@ -77,7 +47,9 @@ void loop() {
     if (interface.call(F("jpeg_image_snapshot"),
                        pixformat_and_framesize, sizeof(pixformat_and_framesize) - 1, // Do not send NULL terminator
                        &jpeg_size, sizeof(jpeg_size))) {
+                        
         Serial.println(F("Success"));
+        if (!client.connected()) return;
         
         // jpeg_image_read toma 2 argumentos, offset: en donde va la lectura y size: el tamaño de la imagen.
         // Estos argumentos se pueden pasar usando la siguiente estructura.
@@ -101,26 +73,57 @@ void loop() {
             Serial.print(F("Reading bytes "));
             Serial.print((arg.offset * 100) / jpeg_size);
             Serial.println(F("%"));
-            if (interface.call_no_copy(F("jpeg_image_read"), &arg, sizeof(arg), &jpg_data, &jpg_data_len)) {
+            if (interface.call(F("jpeg_image_read"), &arg, sizeof(arg), &jpg_data, jpg_data_len)) {
                 Serial.println(F("Writing bytes..."));
 
                 // Finalmente escribimos los datos en el servidor.
-                client.write((char *)cam.getfb(), cam.getSize())
-                // Once the data has been written increment our offset in the jpeg file we are reading. 
+                client.write((char *)jpg_data, jpg_data_len);
                 arg.offset += jpg_data_len;
 
-                // Close the file and go to the next one once finished.
+                // Termina el ciclo una vez escribe la imagen
                 if (arg.offset >= jpeg_size) {
                     Serial.println(F("File written"));
                     break;
                 }
             } else {
                 Serial.println(F("Failed!"));
-                jpg_file.close();
                 break;
             }
         }
     } else {
         Serial.println(F("Failed!"));
     }
+}
+
+void setup() {
+    // Inicio la interface y un canal de debug.
+    interface.begin();
+    Serial.begin(115200);
+
+    while (!Serial); // wait for Serial Monitor to connect. Needed for native USB port boards only:
+    IPAddress ip;
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(SSID1, PWD1);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(F("."));
+    }
+    ip = WiFi.localIP();
+    Serial.println(F("WiFi connected"));
+    Serial.println("");
+    Serial.println(ip);
+    //Serial.print("Stream Link: http://");
+    //Serial.print(ip);
+    //Serial.println("/mjpeg/1");
+    //server.on("/mjpeg/1", HTTP_GET, handle_jpg_stream);
+    server.on("/jpg", HTTP_GET, handle_jpg);
+    //server.onNotFound(handleNotFound);
+    server.begin();
+    Serial.println(F("Initialization done."));
+}
+
+void loop() {
+    server.handleClient();
 }
