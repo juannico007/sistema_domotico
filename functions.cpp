@@ -2,9 +2,20 @@
 
 //---------------------------------FUNCIONES USADAS EN VARIOS SISTEMAS---------------------------------
 
-bool read_movement(int PIR){
-  //Funcion para obtener el movimiento de un sensor PIR
-  return digitalRead(8);
+bool read_movement(int trig, int echo){
+  //Funcion para verificar si hay movimiento en el rango del sensor ultrasonido
+  //Retorna verdadero si el sensor de ultrasonido detecta un objeto en su rango
+  //Recibe dos pines que estan conectados al sensor de ultrasonido
+  digitalWrite(trig,HIGH) ;
+  delay(1);
+  digitalWrite(trig,LOW);
+  //Prendemos el pin trig para que envie la señal que llegara al receptor echo
+  tiempo=pulseIn(echo,HIGH);
+  distancia=tiempo/58.2;
+  //Usamos formulas para saber a que distancia se encuentra un objeto
+  delay(1);
+  return(distancia>=2 and distancia<335)
+  //retorna verdadero si hay algo entre los limites del sensor de ultrasonido que va entre 2 cm a 335 cm
 }
 
 //-------------------------------------------------------------------------------------------------------
@@ -43,7 +54,7 @@ void auto_lights(int *bomb, int *PIR, int *fot, int n){
 //-------------------------------------------------------------------------------------------------------
 
 //---------------------------------FUNCIONES RELACIONADAS CON EL SISTEMA DE SEGURIDAD--------------------
-void takePhoto(){
+/*void takePhoto(){
   //Enciende un Led para indicar que esta tomando la foto y procede a tomarla
   digitalWrite(LED, HIGH);
   delay(200);
@@ -54,7 +65,7 @@ void takePhoto(){
   Blynk.setProperty(V1, "urls", "http://" + local_IP + "/capture?_cb=" + (String)randomNum); //El widget de la aplicacion accede a la url de la imagen
   digitalWrite(LED, LOW);
   delay(1000);
-}
+}*/
 
 void alarm_and_notify(int BUZZER, int *bomb, int n){
   //Enciende la alarma, prende luces, toma foto del intruso y notifica al usuario
@@ -62,7 +73,7 @@ void alarm_and_notify(int BUZZER, int *bomb, int n){
   Blynk.notify("Alerta: Hay alguien en casa");
   for(int i = 0; i < n; i++)
     turn_light(bomb[i], true);                      //Esta condicion debe ser cambiada por la toma de hora para que si es de dia no se encienda la luz
-  takePhoto();
+  //takePhoto();
   tone(BUZZER, 500);
 }
 
