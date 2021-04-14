@@ -16,7 +16,7 @@ sensor.skip_frames(time = 2000)
 omv.disable_fb(True)
 
 #Establezco la conexion I2C de la camara como slave
-interface = rpc.rpc_i2c_slave()
+interface = rpc.rpc_can_slave(0x7FF)
 
 ################################################################
 # Call Backs
@@ -25,7 +25,7 @@ interface = rpc.rpc_i2c_slave()
 # Establece el formato de los pixeles y el tamaño del frame, toma la foto
 # y retorna el tamaño del buffer jpg para guardar la imagen
 #
-# Recibe un string con el formato de pixeles y el tamaño del frame
+# Recibe una estructura con el formato de pixeles y el tamaño del frame
 def jpeg_image_snapshot(data):
     pixformat, framesize = bytes(data).decode().split(",")
     sensor.set_pixformat(eval(pixformat))

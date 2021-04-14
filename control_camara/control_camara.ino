@@ -16,8 +16,9 @@
 // La cantidad de datos pasadas por mensaje está limitada al tamaño del buffer.
 openmv::rpc_scratch_buffer<32> scratch_buffer; 
 
-//Establezco el protocolo I2C para controlar la camara
-openmv::rpc_i2c_master interface(0x12, 100000); 
+//Establezco el protocolo CAN para controlar la camara
+//Recibe identificador de los mensajes y velocidad de transmision
+openmv::rpc_can_master interface(0x7FF, 250E3);
 
 #define SSID1 "replace with your wifi ssid"
 #define PWD1 "replace your wifi password"
@@ -97,6 +98,8 @@ void handle_jpg(void)
 
 void setup() {
     // Inicio la interface y un canal de debug.
+    CAN.setPins(5, 4); // RX & TX
+    
     interface.begin();
     Serial.begin(115200);
 
