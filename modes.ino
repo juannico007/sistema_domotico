@@ -18,9 +18,10 @@ float temperature1 = 0;
 float humidity1   = 0;
 int   ldrVal;
 int   switchMode = 1; //Auto por default 
+int security = 1; //seguridad ON por default
 
 //Set values for Auto Control Mode
-const float maxT = 24.5;
+const float maxT = 22.5;
 
 const int maxL = 800;
 
@@ -29,13 +30,14 @@ const int maxL = 800;
 #define LDR_PIN            32 
 #define DHTPIN             13 
 
-#define pinFan      35   
+#define pinFan      14   
 #define pinLed      27   
 
 
 #define VPIN_BUTTON_L    V1
 #define VPIN_BUTTON_T    V2
 #define VPIN_BUTTON_C    V3
+#define VPIN_BUTTON_S    V4
 
 #define VPIN_HUMIDITY    V5
 #define VPIN_TEMPERATURE V6
@@ -44,6 +46,14 @@ const int maxL = 800;
 #define DHTTYPE DHT11     // DHT 11
 //#define DHTTYPE DHT22   // DHT 22, AM2302, AM2321
 //#define DHTTYPE DHT21   // DHT 21, AM2301
+
+int disp_ultra = 26;   // triger Pin 7
+int ent_ultra = 25;    // echo Pin 8
+int canal=5;          // canal por donde se establece la comuncacion
+int frecuencia=700;   //Sonido (agudo, grave)
+int ciclo=8;          // ciclo de trabajo
+long tiempo;
+float distancia;
 
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -83,6 +93,7 @@ BLYNK_CONNECTED() {
   Blynk.syncVirtual(VPIN_BUTTON_T);
   Blynk.syncVirtual(VPIN_BUTTON_L);
   Blynk.syncVirtual(VPIN_BUTTON_C);
+  
 }
 
 // When App button is pushed - switch the state
@@ -101,28 +112,65 @@ BLYNK_WRITE(VPIN_BUTTON_C) {
   switchMode = param.asInt();
 }
 
+BLYNK_WRITE(VPIN_BUTTON_S) {
+  security = param.asInt();
+}
+
 void mode(){
-  if(switchMode == 1){ //if Auto Mode
+  if(switchMode == 1 && distancia<6){ //if Auto Mode
     if(ldrVal  <= maxL){
       digitalWrite(27, HIGH); 
       Blynk.virtualWrite(V1, 1);
+      delay(5000);
+      digitalWrite(27, LOW);
+      Blynk.virtualWrite(V1, 0);
     }else if(ldrVal > maxL){
       digitalWrite(27, LOW);
       Blynk.virtualWrite(V1, 0);
     }
   
     if(temperature1  >= maxT){
-      digitalWrite(35, HIGH); 
+      digitalWrite(14, HIGH); 
       Blynk.virtualWrite(V2, 1);
+      delay(10000);
+      digitalWrite(14, LOW);
+      Blynk.virtualWrite(V2, 0);
     }else if(temperature1 < maxT){
-      digitalWrite(35, LOW);
+      digitalWrite(14, LOW);
       Blynk.virtualWrite(V2, 0);
     }
   }
 }
+
+void sonido(){
+  digitalWrite(disp_ultra, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(disp_ultra, LOW);
+
+  tiempo = (pulseIn(ent_ultra, HIGH)/2);
+  distancia = float(tiempo * 0.0340);
+  
+  if(distancia<6 && security == 1){ //distancia menor a la del piso
+    Serial.println("a");
+    Blynk.notify("Hay un intruso");
+    Blynk.email("Seguridad", "Hay un intruso");
+    ledcWriteTone(canal, 500);
+    delay(2000);
+    ledcWriteTone(canal, 0);
+  }
+}
+
+
+
 void setup()
 {
-  Serial.begin(9600);
+
+  Serial.begin(115200);
+  pinMode(disp_ultra, OUTPUT);
+  pinMode(ent_ultra, INPUT);
+
+  ledcSetup(canal, frecuencia, ciclo);
+  ledcAttachPin(33, canal);
 
   pinMode(pinFan, OUTPUT);
   digitalWrite(pinFan, state_t);
@@ -142,5 +190,7 @@ void loop(){
 
   timer.run();
   Blynk.run();
+  sonido(); 
   mode(); 
+   
 }
