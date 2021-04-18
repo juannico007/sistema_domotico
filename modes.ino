@@ -1,6 +1,6 @@
  #define BLYNK_PRINT Serial
 
-
+ #include <Blynk.h>
  #include <WiFi.h>
  #include <WiFiClient.h>
  #include <BlynkSimpleEsp32.h>
@@ -18,12 +18,12 @@ float temperature1 = 0;
 float humidity1   = 0;
 int   ldrVal;
 int   switchMode = 1; //Auto por default 
-int security = 1; //seguridad ON por default
+int security = 0; //seguridad OFF por default
 
 //Set values for Auto Control Mode
-const float maxT = 22.5;
+const float maxT = 26;
 
-const int maxL = 800;
+const int maxL = 1000;
 
 
 
@@ -117,7 +117,7 @@ BLYNK_WRITE(VPIN_BUTTON_S) {
 }
 
 void mode(){
-  if(switchMode == 1 && distancia<6){ //if Auto Mode
+  if(switchMode == 1 && distancia<6 && security == 0){ //if Auto Mode
     if(ldrVal  <= maxL){
       digitalWrite(27, HIGH); 
       Blynk.virtualWrite(V1, 1);
@@ -153,7 +153,7 @@ void sonido(){
   if(distancia<6 && security == 1){ //distancia menor a la del piso
     Serial.println("a");
     Blynk.notify("Hay un intruso");
-    Blynk.email("Seguridad", "Hay un intruso");
+    //Blynk.email("Seguridad", "Hay un intruso");
     ledcWriteTone(canal, 500);
     delay(2000);
     ledcWriteTone(canal, 0);
