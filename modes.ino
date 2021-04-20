@@ -1,3 +1,4 @@
+
  #define BLYNK_PRINT Serial
 
  #include <Blynk.h>
@@ -5,9 +6,12 @@
  #include <WiFiClient.h>
  #include <BlynkSimpleEsp32.h>
  #include <DHT.h>
- 
+ #include <ESP32Servo.h>
 
- char auth[] = "envom_tX8Wm5f4RQhZtImbiXby06WDTo";
+Servo myservo; 
+//int ADC_Max = 4096;
+
+char auth[] = "envom_tX8Wm5f4RQhZtImbiXby06WDTo";
 
 char ssid[] = "GUGU515TP";
 char pass[] = "17589979";
@@ -21,7 +25,7 @@ int   switchMode = 1; //Auto por default
 int security = 0; //seguridad OFF por default
 
 //Set values for Auto Control Mode
-const float maxT = 26;
+const float maxT = 25;
 
 const int maxL = 1000;
 
@@ -31,7 +35,8 @@ const int maxL = 1000;
 #define DHTPIN             13 
 
 #define pinFan      14   
-#define pinLed      27   
+#define pinLed      23   
+#define servoPin    27
 
 
 #define VPIN_BUTTON_L    V1
@@ -41,6 +46,8 @@ const int maxL = 1000;
 
 #define VPIN_HUMIDITY    V5
 #define VPIN_TEMPERATURE V6
+#define VPIN_SERVO V7
+
 
 // Uncomment whatever type you're using!
 #define DHTTYPE DHT11     // DHT 11
@@ -116,16 +123,21 @@ BLYNK_WRITE(VPIN_BUTTON_S) {
   security = param.asInt();
 }
 
+
+BLYNK_WRITE(VPIN_SERVO) {
+  myservo.write(param.asInt());
+}
+
 void mode(){
   if(switchMode == 1 && distancia<6 && security == 0){ //if Auto Mode
     if(ldrVal  <= maxL){
-      digitalWrite(27, HIGH); 
+      digitalWrite(23, HIGH); 
       Blynk.virtualWrite(V1, 1);
       delay(5000);
-      digitalWrite(27, LOW);
+      digitalWrite(23, LOW);
       Blynk.virtualWrite(V1, 0);
     }else if(ldrVal > maxL){
-      digitalWrite(27, LOW);
+      digitalWrite(23, LOW);
       Blynk.virtualWrite(V1, 0);
     }
   
@@ -183,6 +195,14 @@ void setup()
   dht.begin();
   // Setup a function to be called every second
   timer.setInterval(1000L, sendSensor);
+
+  // Allow allocation of all timers
+    ESP32PWM::allocateTimer(0);
+    ESP32PWM::allocateTimer(1);
+    ESP32PWM::allocateTimer(2);
+    ESP32PWM::allocateTimer(3);
+  myservo.setPeriodHertz(50);// Standard 50hz servo
+  myservo.attach(servoPin, 500, 2400);
   
 }
 
