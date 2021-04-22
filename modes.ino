@@ -1,5 +1,4 @@
-
- #define BLYNK_PRINT Serial
+#define BLYNK_PRINT Serial
 
  #include <Blynk.h>
  #include <WiFi.h>
@@ -46,7 +45,9 @@ const int maxL = 1000;
 
 #define VPIN_HUMIDITY    V5
 #define VPIN_TEMPERATURE V6
-#define VPIN_SERVO V7
+#define VPIN_SERVO       V7
+
+#define VPIN_MODO        V8
 
 
 // Uncomment whatever type you're using!
@@ -68,7 +69,6 @@ BlynkTimer timer;
 
 
 void readSensor(){
-
   ldrVal = analogRead(LDR_PIN);
 
   float h = dht.readHumidity();
@@ -84,8 +84,7 @@ void readSensor(){
   }
 }
 
-void sendSensor()
-{
+void sendSensor(){
   readSensor();
   // You can send any value at any time.
   // Please don't send more that 10 values per second.
@@ -94,17 +93,13 @@ void sendSensor()
 }
 
 BLYNK_CONNECTED() {
-
   // Request the latest state from the server
-
   Blynk.syncVirtual(VPIN_BUTTON_T);
   Blynk.syncVirtual(VPIN_BUTTON_L);
   Blynk.syncVirtual(VPIN_BUTTON_C);
-  
 }
 
 // When App button is pushed - switch the state
-
 BLYNK_WRITE(VPIN_BUTTON_T) {
   state_t = param.asInt();
   digitalWrite(pinFan, state_t);
@@ -126,6 +121,27 @@ BLYNK_WRITE(VPIN_BUTTON_S) {
 
 BLYNK_WRITE(VPIN_SERVO) {
   myservo.write(param.asInt());
+}
+
+BLYNK_WRITE(VPIN_MODO){
+  switch(param.asInt()){
+    case 1: // Modo Cine
+      Serial.println("Modo Cine seleccionado");
+      digitalWrite(pinLed, LOW);
+      Blynk.virtualWrite(V1, 0);
+      myservo.write(180);
+      Blynk.virtualWrite(V7, 180);
+      break;
+    case 2: // Modo Fiesta
+      Serial.println("Modo fiesta seleccionado");
+      break;
+    case 3: // Modo normal
+      Serial.println("Item 3 seleccionado");
+      break;
+    default:
+      Serial.println("Item desconocido");
+      break;
+  }
 }
 
 void mode(){
@@ -173,10 +189,7 @@ void sonido(){
 }
 
 
-
-void setup()
-{
-
+void setup(){
   Serial.begin(115200);
   pinMode(disp_ultra, OUTPUT);
   pinMode(ent_ultra, INPUT);
@@ -197,20 +210,56 @@ void setup()
   timer.setInterval(1000L, sendSensor);
 
   // Allow allocation of all timers
-    ESP32PWM::allocateTimer(0);
-    ESP32PWM::allocateTimer(1);
-    ESP32PWM::allocateTimer(2);
-    ESP32PWM::allocateTimer(3);
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  ESP32PWM::allocateTimer(2);
+  ESP32PWM::allocateTimer(3);
   myservo.setPeriodHertz(50);// Standard 50hz servo
   myservo.attach(servoPin, 500, 2400);
-  
 }
 
 void loop(){
-
   timer.run();
   Blynk.run();
   sonido(); 
-  mode(); 
-   
+  mode();  
 }
+
+/*
+void modo_fiesta(int R, int G, int B) {
+  /* Ejecuta la iluminacion en casa con distintos colores para dar ambientacion de fiesta
+     Recibe los pines correspondientes a los que esta conectado el led RGB
+  digitalWrite(R,HIGH);
+  digitalWrite(G,HIGH);
+  digitalWrite(B,HIGH);
+  delay(100);
+  digitalWrite(R,LOW);
+  digitalWrite(G,LOW);
+  digitalWrite(B,LOW);
+  delay(100);
+  digitalWrite(R,LOW);
+  digitalWrite(G,HIGH);
+  digitalWrite(B,LOW);
+  delay(100);
+  digitalWrite(R,LOW);
+  digitalWrite(G,LOW);
+  digitalWrite(B,HIGH);
+  delay(100);
+  digitalWrite(R,LOW);
+  digitalWrite(G,HIGH);
+  digitalWrite(B,HIGH);
+  delay(100);
+  digitalWrite(R,HIGH);
+  digitalWrite(G,LOW);
+  digitalWrite(B,HIGH);
+  delay(100);
+  digitalWrite(R,HIGH);
+  digitalWrite(G,HIGH);
+  digitalWrite(B,LOW);
+  delay(100);
+  digitalWrite(R,HIGH);
+  digitalWrite(G,HIGH);
+  digitalWrite(B,LOW);
+  delay(100);
+}
+*/
