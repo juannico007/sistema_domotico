@@ -47,8 +47,10 @@ void getCurrentTime(int &hours, int &minutes, int &seconds){
 void blindsTimeAction(int hours, int minutes){
   if (hours >= 6) {
     myservo.write(0);
-  }else if (hours <= 18){
+    Blynk.virtualWrite(V7, 0);
+  }else if (hours >= 18){
     myservo.write(180);
+    Blynk.virtualWrite(V7, 180);
   }
 }
 
@@ -63,7 +65,6 @@ void blindsTimeAction(int hours, int minutes){
 #define VPIN_BUTTON_L    V1
 #define VPIN_BUTTON_T    V2
 #define VPIN_BUTTON_C    V3
-#define VPIN_BUTTON_S    V4
 
 #define VPIN_HUMIDITY    V5
 #define VPIN_TEMPERATURE V6
@@ -138,32 +139,42 @@ BLYNK_WRITE(VPIN_BUTTON_C) {
   switchMode = param.asInt();
 }
 
-BLYNK_WRITE(VPIN_BUTTON_S) {
-  security = param.asInt();
-}
-
-
 BLYNK_WRITE(VPIN_SERVO) {
   myservo.write(param.asInt());
 }
-
 BLYNK_WRITE(VPIN_MODO){
   switch(param.asInt()){
     case 1: // Modo Cine
       Serial.println("Modo Cine seleccionado");
+      security = 2; 
       digitalWrite(pinLed, LOW);
       Blynk.virtualWrite(V1, 0);
-      myservo.write(180);
-      Blynk.virtualWrite(V7, 180);
+      myservo.write(0);
+      Blynk.virtualWrite(V7, 0);
       break;
     case 2: // Modo Fiesta
+      security = 2;
       Serial.println("Modo fiesta seleccionado");
       break;
-    case 3: // Modo normal
-      Serial.println("Item 3 seleccionado");
+    case 3: // Modo Seguro
+      Serial.println("Modo seguro seleccionado");
+      myservo.write(0);
+      Blynk.virtualWrite(V7, 0);
+      security = 1; 
+      if(distancia<6 && security == 1){ //distancia menor a la del piso
+        Blynk.notify("Hay un intruso");
+        ledcWriteTone(canal, 500);
+        delay(2000);
+        ledcWriteTone(canal, 0);
+      }
+      break;
+    case 4: 
+      Serial.println("Modo en casa seleccionado");
+      security = 0;
       break;
     default:
-      Serial.println("Item desconocido");
+      Serial.println("Modo en casa seleccionado");
+      security = 0;
       break;
   }
 }
@@ -193,7 +204,7 @@ void mode(){
     }
   }
   if(switchMode == 1 && security == 0) {
-    blindsTimeAction(int hours, int minutes);
+    blindsTimeAction(hours, minutes);
   }
 }
 
@@ -204,15 +215,15 @@ void sonido(){
 
   tiempo = (pulseIn(ent_ultra, HIGH)/2);
   distancia = float(tiempo * 0.0340);
-  
+
   if(distancia<6 && security == 1){ //distancia menor a la del piso
-    Serial.println("a");
     Blynk.notify("Hay un intruso");
     //Blynk.email("Seguridad", "Hay un intruso");
     ledcWriteTone(canal, 500);
     delay(2000);
     ledcWriteTone(canal, 0);
   }
+  
 }
 
 
