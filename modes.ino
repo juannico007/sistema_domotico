@@ -34,14 +34,14 @@ WidgetRTC rtc;
 
 //  Time variable definition
 
-int hours = 0;
-int minutes = 0;
-int seconds = 0;
+int hours;
+int minutes;
+int seconds;
 
 void getCurrentTime(int &hours, int &minutes, int &seconds){    
-  int hours = hour();
-  int minutes = minute();
-  int seconds = second();
+  hours = hour();
+  minutes = minute();
+  seconds = second();
   Serial.print(hours);
   Serial.print(minutes);
   Serial.print(seconds);
@@ -235,14 +235,14 @@ void setup(){
   ESP32PWM::allocateTimer(3);
   myservo.setPeriodHertz(50);// Standard 50hz servo
   myservo.attach(servoPin, 500, 2400);
-  timer.setInterval(10000L, getCurrentTime(hours, minutes, seconds));
 }
 
 void loop(){
   timer.run();
   Blynk.run();
   sonido(); 
-  mode();  
+  mode();
+  getCurrentTime(hours, minutes, seconds);
 }
 
 /*
