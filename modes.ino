@@ -46,9 +46,9 @@ void getCurrentTime(int &hours, int &minutes, int &seconds){
 
 void blindsTimeAction(int hours, int minutes){
   if (hours >= 6) {
-    myservo.write(0)
+    myservo.write(0);
   }else if (hours <= 18){
-    close(position)
+    myservo.write(180);
   }
 }
 
@@ -191,6 +191,8 @@ void mode(){
       digitalWrite(14, LOW);
       Blynk.virtualWrite(V2, 0);
     }
+  }
+  if(switchMode == 1 && security == 0) {
     blindsTimeAction(int hours, int minutes);
   }
 }
