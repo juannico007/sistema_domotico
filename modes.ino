@@ -1,11 +1,11 @@
 #define BLYNK_PRINT Serial
 
- #include <Blynk.h>
- #include <WiFi.h>
- #include <WiFiClient.h>
- #include <BlynkSimpleEsp32.h>
- #include <DHT.h>
- #include <ESP32Servo.h>
+#include <Blynk.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+#include <DHT.h>
+#include <ESP32Servo.h>
 #include <TimeLib.h>
 #include <WidgetRTC.h>
 
@@ -42,9 +42,14 @@ void getCurrentTime(int &hours, int &minutes, int &seconds){
   hours = hour();
   minutes = minute();
   seconds = second();
-  Serial.print(hours);
-  Serial.print(minutes);
-  Serial.print(seconds);
+}
+
+void blindsTimeAction(int hours, int minutes){
+  if (hours >= 6) {
+    myservo.write(0)
+  }else if (hours <= 18){
+    close(position)
+  }
 }
 
 #define LDR_PIN            32 
@@ -186,6 +191,7 @@ void mode(){
       digitalWrite(14, LOW);
       Blynk.virtualWrite(V2, 0);
     }
+    blindsTimeAction(int hours, int minutes);
   }
 }
 
