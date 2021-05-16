@@ -178,7 +178,7 @@ void readSensor(){
   ldrValS = analogRead(LDR_PINS);
   ldrValE = analogRead(LDR_PINE);
   ldrValH = analogRead(LDR_PINH);
-  Serial.println(ldrValS);
+  Serial.println(ldrValH);
 
   //Temperatura y humedad
   float h = dht.readHumidity();
@@ -352,7 +352,7 @@ void secure_f(){
     Serial.println("Modo seguro seleccionado");
     security = 1;
     //distancia menor a la del piso
-    if(distanciaE<15 && security == 1){ 
+    if(distanciaE<12 && security == 1){ 
       Blynk.notify("Hay un intruso");
       Serial.println("Intruso!");
       ledcWriteTone(canal, 500);
@@ -392,7 +392,7 @@ void mode(){
     AjustarPersiana(hours, minutes);
     
     //Si detecta una persona en la sala
-    if(distanciaS < 6){
+    if(distanciaS < 15){
       if(ldrValS <= maxL){
         Blynk.virtualWrite(VPIN_BUTTON_LS, 1);
         Wire.beginTransmission(1);
@@ -431,7 +431,7 @@ void mode(){
     }
     
     //Si detecta una persona en la entrada
-    if(distanciaE < 6){
+    if(distanciaE < 12){
       if(ldrValE <= maxL){
         Blynk.virtualWrite(VPIN_BUTTON_LE, 1);
         Wire.beginTransmission(1);
@@ -452,7 +452,7 @@ void mode(){
     }
 
     //Si detecta una persona en la habitacion
-    if(distanciaH < 6){
+    if(distanciaH < 20){
       Serial.println("h");
       if(ldrValH <= maxL){
         Blynk.virtualWrite(VPIN_BUTTON_LH, 1);
@@ -502,7 +502,6 @@ void setup() {
   Serial.begin(115200);
   Blynk.begin(auth, ssid, pass);
   dht.begin();
-  timer.setInterval(2000L, sendSensor);
   secure_timer_ID = timer.setInterval(1000L, secure_f);
   timer.disable(secure_timer_ID);
   fiesta_timer_ID = timer.setInterval(1000L, fiesta_f);
@@ -525,7 +524,10 @@ void setup() {
 void loop() {
   timer.run();
   Blynk.run();
+  sendSensor();
   sonido();
   mode();
   getCurrentTime(hours, minutes, seconds);
+  Serial.println(distanciaE);
+
 }
