@@ -1,3 +1,4 @@
+
 //Slave code
 #include<Wire.h>
 #include <Servo.h>
@@ -14,7 +15,7 @@
 #define B 6
 
 #define DHTPIN 13
-#define AUTO 100 
+#define AUTO 100
 #define cine 110
 #define seguro 111
 #define fiesta 112
@@ -23,7 +24,7 @@
 //const float maxT = 23.5;
 //const int maxL = 1000;
 
-int ldrVal; 
+int ldrVal;
 int pin;
 int fiesta_activo = 0;
 Servo myservo;
@@ -69,11 +70,11 @@ void fiesta_f(){
       digitalWrite(B,HIGH);
       delay(500);
       digitalWrite(R,HIGH);
-      digitalWrite(G,HIGH);
+      digitalWrite(G,LOW);
       digitalWrite(B,LOW);
       delay(500);
       digitalWrite(R,HIGH);
-      digitalWrite(G,LOW);
+      digitalWrite(G,HIGH);
       digitalWrite(B,LOW);
       delay(500);
       digitalWrite(R,LOW);
@@ -96,19 +97,19 @@ void receiveEvent(){
     pins[i] = Wire.read();
     states[i] = Wire.read();
   }
-  
+
   for(int i = 0; i < n; i++){
     Serial.println(states[i]);
     Serial.println(pins[i]);
-    
+
     if(pins[i] == 9){
       myservo.write(states[i++]);
       myservo2.write(states[i]);
     }else{
       digitalWrite(pins[i], states[i]);
     }
-    
-    //escenarios modos 
+
+    //escenarios modos
     if(pins[i] == cine){
       //Serial.println("Entra cine");
       digitalWrite(l_s, 0);
@@ -116,7 +117,7 @@ void receiveEvent(){
       digitalWrite(l_h, 0);
       myservo.write(0);
       myservo2.write(180);
-      
+
     }if(pins[i] == seguro){
       myservo.write(0);
       myservo2.write(180);
@@ -133,7 +134,7 @@ void receiveEvent(){
     }else{
       fiesta_activo = 0;
     }
-    
+
     Serial.print("pin ");
     Serial.print(pins[i]);
     Serial.print(" in state ");
