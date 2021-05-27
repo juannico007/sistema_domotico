@@ -100,7 +100,7 @@ int switchMode;
 
 //Limites de temperatura y luz
 const float maxT = 23.5;
-const int maxL = 800;
+const int maxL = 900;
 
 //Variables para controlar adecuadamente el buzzer desde el esp32
 int canal=5;          // canal por donde se establece la comuncacion
@@ -116,8 +116,8 @@ int seconds;
 char auth[] = "envom_tX8Wm5f4RQhZtImbiXby06WDTo";
 
 //Usuario y contraseña para la conexion a internet
-char ssid[] = /*"FAMILIA QUINTERO"*/ "HUAWEI P30 lite";
-char pass[] = /*"familiaquintero1"*/ "08e7130794a2";
+char ssid[] = "NEMESIS 2";
+char pass[] = "20opulencia20";
 
 int last_ID = 0;
 int secure_timer_ID;
@@ -152,7 +152,7 @@ void AjustarPersiana(int hours, int minutes){
   Blynk.virtualWrite(V7, servo_stateI);
   
   Wire.beginTransmission(1);
-  Serial.println("Sending info left servo");
+//  Serial.println("Sending info left servo");
   Wire.write(pinServoI);
   Wire.write(servo_stateI);
   Wire.write(pinServoD);
@@ -178,7 +178,7 @@ void readSensor(){
   ldrValS = analogRead(LDR_PINS);
   ldrValE = analogRead(LDR_PINE);
   ldrValH = analogRead(LDR_PINH);
-  Serial.println(ldrValH);
+//  Serial.println(ldrValH);
 
   //Temperatura y humedad
   float h = dht.readHumidity();
@@ -196,7 +196,7 @@ void readSensor(){
 
 //Envio de temperatura y humedad a la aplicacion
 void sendSensor(){
-  Serial.println("a morir");
+//  Serial.println("a morir");
   readSensor();
   Blynk.virtualWrite(VPIN_HUMIDITY, humidity);
   Blynk.virtualWrite(VPIN_TEMPERATURE, temperature);
@@ -410,7 +410,7 @@ void mode(){
         Wire.write(0);
         Wire.endTransmission();
       }
-  
+      Serial.println("a");
       if(temperature  >= maxT){
         Blynk.virtualWrite(VPIN_BUTTON_F, 1);
         Wire.beginTransmission(1);
@@ -500,6 +500,7 @@ void mode(){
 void setup() {
   Wire.begin();
   Serial.begin(115200);
+  Serial.println("A");
   Blynk.begin(auth, ssid, pass);
   dht.begin();
   secure_timer_ID = timer.setInterval(1000L, secure_f);
@@ -528,6 +529,9 @@ void loop() {
   sonido();
   mode();
   getCurrentTime(hours, minutes, seconds);
-  Serial.println(distanciaE);
+  
+//  Serial.println(distanciaE);
 
+  Serial.println("habitacion");
+  Serial.println(ldrValH);
 }

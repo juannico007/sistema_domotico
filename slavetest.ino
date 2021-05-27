@@ -73,7 +73,7 @@ void fiesta_f(){
       digitalWrite(B,LOW);
       delay(500);
       digitalWrite(R,HIGH);
-      digitalWrite(G,HIGH);
+      digitalWrite(G,LOW);
       digitalWrite(B,LOW);
       delay(500);
       digitalWrite(R,LOW);
